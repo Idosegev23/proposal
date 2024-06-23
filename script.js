@@ -1,6 +1,3 @@
-// הוסף כאן את הפונט העברי בפורמט base64
-const davidFont = '...'; // יש להחליף זאת עם המחרוזת base64 האמיתית של הפונט
-
 // אתחול OAuth 2.0 Client
 function initClient() {
     gapi.client.init({
@@ -10,6 +7,12 @@ function initClient() {
         console.log('OAuth 2.0 Client initialized');
     }).catch(error => {
         console.error('Error initializing OAuth 2.0 Client:', error);
+        // נסה להתחבר באופן ידני
+        gapi.auth2.getAuthInstance().signIn().then(() => {
+            console.log('Manual sign-in successful');
+        }).catch(signInError => {
+            console.error('Manual sign-in failed:', signInError);
+        });
     });
 }
 
@@ -94,11 +97,6 @@ async function createPDF(proposalElement, signatureDataURL) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    // הוספת הפונט העברי
-    pdf.addFileToVFS('David-normal.ttf', davidFont);
-    pdf.addFont('David-normal.ttf', 'David', 'normal');
-    pdf.setFont('David');
-
     // קביעת גודל הדף
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
@@ -107,7 +105,9 @@ async function createPDF(proposalElement, signatureDataURL) {
     const canvas = await html2canvas(proposalElement, {
         scale: 2,
         useCORS: true,
-        logging: false
+        logging: false,
+        allowTaint: true,
+        taintTest: false
     });
     
     // המרת הקנבס לתמונה
