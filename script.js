@@ -43,14 +43,11 @@ function draw(event) {
 
 // שליחה של ההצעה החתומה במייל לאחר החתימה
 document.getElementById('submitSignature').addEventListener('click', function() {
-    // שמירת החתימה כתמונה
+    // שמירת החתימה כתמונה ב-Base64
     const dataURL = canvas.toDataURL('image/png');
-
-    // יצירת קישור לשמירת התמונה באופן זמני
-    const link = document.createElement('a');
-    link.href = dataURL;
-    link.download = 'signature.png';
-    link.click();
+    
+    // יצירת אובייקט File מהנתונים
+    const file = new File([dataURLToBlob(dataURL)], 'signature.png', { type: 'image/png' });
 
     // הגדרת פרטי המייל
     const emailSubject = 'אישור הצעת מחיר';
@@ -65,60 +62,35 @@ document.getElementById('submitSignature').addEventListener('click', function() 
         <img src="${dataURL}" alt="חתימה דיגיטלית" />
     `;
 
-    // שימוש ב-Gmail API לשליחת המייל
-    sendEmail('Triroars@gmail.com', 'shimi.homerun@gmail.com', emailSubject, emailBody, dataURL);
+    // שימוש ב-FormData לשליחת הקובץ והנתונים
+    const formData = new FormData();
+    formData.append('from', 'Triroars@gmail.com');
+    formData.append('to', 'Triroars@gmail.com, shimi.homerun@gmail.com');
+    formData.append('subject', emailSubject);
+    formData.append('html', emailBody);
+    formData.append('attachments', file);
+
+    // שליחה של הנתונים לשרת דואר (כאן נדרש API או שרת שיטפל בבקשה)
+    fetch('https://your-server-endpoint/send-email', {
+        method: 'POST',
+        body: formData,
+    }).then(response => response.json())
+      .then(result => {
+          console.log('Email sent:', result);
+      }).catch(error => {
+          console.error('Error sending email:', error);
+      });
 
     // הסתרת פופאפ החתימה לאחר השליחה
     document.getElementById('signaturePopup').style.display = 'none';
 });
 
-async function sendEmail(from, to, subject, body, signatureDataURL) {
-    // פרטי OAuth2 שלך
-    const clientId = '773526387599-e7plamuuek9uobg1m4grf5ij30t7sfhg.apps.googleusercontent.com';
-    const clientSecret = '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';
-    const refreshToken = '1//03UCWOVTdiT2JCgYIARAAGAMSNwF-L9IrgSTrMW6iKB_kUgAzhtxBgD-I7kB78_wbAMm73OHj2BgmO4rjrWV_wSrvLEeOmIjpTw0';
-
-    // הגדרת ה-client OAuth2
-    const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
-
-    oAuth2Client.setCredentials({ refresh_token: refreshToken });
-
-    try {
-        // קבלת access token
-        const accessToken = await oAuth2Client.getAccessToken();
-
-        // קביעת הטרנספורטר של Nodemailer
-        const transport = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: from,
-                clientId,
-                clientSecret,
-                refreshToken,
-                accessToken: accessToken.token,
-            },
-        });
-
-        // קביעת אפשרויות המייל
-        const mailOptions = {
-            from,
-            to,
-            subject,
-            html: body,
-            attachments: [
-                {
-                    filename: 'signature.png',
-                    content: signatureDataURL.split('base64,')[1],
-                    encoding: 'base64'
-                }
-            ]
-        };
-
-        // שליחת המייל
-        const result = await transport.sendMail(mailOptions);
-        console.log('Email sent:', result);
-    } catch (error) {
-        console.error('Error sending email:', error);
+// פונקציה להמרת Base64 ל-Blob
+function dataURLToBlob(dataURL) {
+    const binary = atob(dataURL.split(',')[1]);
+    const array = [];
+    for (let i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
     }
+    return new Blob([new Uint8Array(array)], { type: 'image/png' });
 }
