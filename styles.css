@@ -3,9 +3,9 @@ body {
     font-family: 'Heebo', sans-serif;
     margin: 0;
     padding: 0;
-    direction: rtl; /* הגדרה של כיוון הטקסט מימין לשמאל */
-    background: #F9FAFC; /* רקע אפור בהיר ונעים */
-    color: #333333; /* צבע טקסט כהה ועדין */
+    direction: rtl;
+    background: #F9FAFC;
+    color: #333333;
     line-height: 1.6;
 }
 
@@ -21,25 +21,25 @@ body {
 header {
     text-align: center;
     padding: 20px 0;
-    border-bottom: 2px solid #B8A9C9; /* צבע סגול עדין */
+    border-bottom: 2px solid #B8A9C9;
     background: #FFFFFF;
     border-radius: 10px 10px 0 0;
 }
 
 header .logo {
-    max-width: 150px; /* התאמת גודל הלוגו */
+    max-width: 150px;
     margin-bottom: 10px;
 }
 
 header h1 {
     font-size: 2em;
-    color: #4A3F68; /* סגול עמוק ועדין */
+    color: #4A3F68;
     margin: 10px 0;
 }
 
 header h2 {
     font-size: 1.4em;
-    color: #8E7CC3; /* סגול בהיר יותר */
+    color: #8E7CC3;
 }
 
 nav a {
@@ -68,9 +68,9 @@ main {
 
 .card h2 {
     font-size: 1.6em;
-    color: #4A3F68; /* סגול עמוק ועדין */
+    color: #4A3F68;
     margin-bottom: 15px;
-    border-bottom: 2px solid #B8A9C9; /* הדגשת כותרות */
+    border-bottom: 2px solid #B8A9C9;
     padding-bottom: 10px;
 }
 
@@ -82,24 +82,24 @@ main {
 .card ul li {
     font-size: 1.1em;
     margin-bottom: 10px;
-    color: #333333; /* צבע טקסט כהה ועדין */
+    color: #333333;
 }
 
 /* סגנון לכפתור החתימה */
 .button {
-    background-color: #4A3F68; /* סגול עמוק ועדין */
+    background-color: #4A3F68;
     color: #FFFFFF;
     border: none;
-    padding: 15px 30px; /* הגדלת הכפתור */
+    padding: 15px 30px;
     font-size: 1.2em;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease; /* אפקט מעבר */
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .button:hover {
-    background-color: #8E7CC3; /* סגול בהיר יותר */
-    transform: scale(1.05); /* אפקט הגדלה */
+    background-color: #8E7CC3;
+    transform: scale(1.05);
 }
 
 /* סגנון לכפתור וואטסאפ */
@@ -140,17 +140,17 @@ main {
     background-color: #FFFFFF;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    display: none; /* הפופאפ מוסתר עד לפתיחתו */
+    display: none;
     border-radius: 10px;
 }
 
 #signaturePopup canvas {
-    border: 1px solid #333333; /* צבע טקסט כהה ועדין */
+    border: 1px solid #333333;
     margin-bottom: 20px;
 }
 
 #submitSignature, #closePopup {
-    background-color: #4A3F68; /* סגול עמוק ועדין */
+    background-color: #4A3F68;
     color: #FFFFFF;
     border: none;
     padding: 10px 20px;
@@ -162,7 +162,7 @@ main {
 }
 
 #submitSignature:hover, #closePopup:hover {
-    background-color: #8E7CC3; /* סגול בהיר יותר */
+    background-color: #8E7CC3;
 }
 
 /* סגנון לעוגנים ומעבר חלק */
@@ -177,7 +177,7 @@ html {
     }
 
     header .logo {
-        max-width: 120px; /* התאמת גודל הלוגו למסכים קטנים יותר */
+        max-width: 120px;
     }
 
     header h1 {
@@ -200,4 +200,34 @@ html {
     .card h2 {
         font-size: 1.4em;
     }
+}
+
+/* סגנון לפופאפ של תצוגה מקדימה של ה-PDF */
+#pdfPreviewPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: none;
+}
+
+#pdfPreviewPopup > div {
+    background: white;
+    margin: 50px auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80%;
+    overflow: auto;
+    border-radius: 10px;
+}
+
+#pdfPreview {
+    width: 100%;
+    height: 500px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
 }
