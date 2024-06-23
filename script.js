@@ -1,14 +1,15 @@
-// אתחול Google API Client
+// הוסף כאן את הפונט העברי בפורמט base64
+const davidFont = '...'; // יש להחליף זאת עם המחרוזת base64 האמיתית של הפונט
+
+// אתחול OAuth 2.0 Client
 function initClient() {
     gapi.client.init({
-        apiKey: 'YOUR_API_KEY', // החלף עם מפתח ה-API שלך
         clientId: '773526387599-e7plamuuek9uobg1m4grf5ij30t7sfhg.apps.googleusercontent.com',
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
         scope: 'https://www.googleapis.com/auth/gmail.send'
     }).then(() => {
-        console.log('Google API Client initialized');
+        console.log('OAuth 2.0 Client initialized');
     }).catch(error => {
-        console.error('Error initializing Google API Client:', error);
+        console.error('Error initializing OAuth 2.0 Client:', error);
     });
 }
 
@@ -20,6 +21,8 @@ function addEventListeners() {
     document.getElementById('signButton')?.addEventListener('click', showSignaturePopup);
     document.getElementById('closePopup')?.addEventListener('click', hideSignaturePopup);
     document.getElementById('submitSignature')?.addEventListener('click', handleSignatureSubmit);
+    document.getElementById('whatsappButton')?.addEventListener('click', openWhatsApp);
+    document.getElementById('closePdfPreview')?.addEventListener('click', hidePdfPreview);
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', smoothScroll);
     });
@@ -34,6 +37,14 @@ function hideSignaturePopup() {
     document.getElementById('signaturePopup').style.display = 'none';
 }
 
+function hidePdfPreview() {
+    document.getElementById('pdfPreviewPopup').style.display = 'none';
+}
+
+function openWhatsApp() {
+    window.open('https://wa.me/972547667775?text=היי%20עידו%20אנחנו%20נשמח%20לעוד%20פרטים', '_blank');
+}
+
 function smoothScroll(e) {
     e.preventDefault();
     document.querySelector(this.getAttribute('href')).scrollIntoView({
@@ -43,7 +54,7 @@ function smoothScroll(e) {
 
 // הגדרות ליצירת חתימה באמצעות העכבר
 const canvas = document.getElementById('signatureCanvas');
-const ctx = canvas?.getContext('2d');
+const ctx = canvas?.getContext('2d', { willReadFrequently: true });
 let drawing = false;
 
 if (canvas) {
@@ -82,23 +93,57 @@ function draw(event) {
 async function createPDF(proposalElement, signatureDataURL) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const canvasElement = await html2canvas(proposalElement);
-    const imgData = canvasElement.toDataURL('image/png');
+    
+    // הוספת הפונט העברי
+    pdf.addFileToVFS('David-normal.ttf', davidFont);
+    pdf.addFont('David-normal.ttf', 'David', 'normal');
+    pdf.setFont('David');
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvasElement.width;
-    const imgHeight = canvasElement.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 30;
-    pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-
-    pdf.addImage(signatureDataURL, 'PNG', 10, pdfHeight - 60, 80, 20);
-
+    // קביעת גודל הדף
+    const pageWidth = pdf.internal.pageSize.width;
+    const pageHeight = pdf.internal.pageSize.height;
+    
+    // יצירת צילום מסך של ההצעה
+    const canvas = await html2canvas(proposalElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+    });
+    
+    // המרת הקנבס לתמונה
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    
+    // חישוב יחס הגודל
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    // הוספת התמונה לPDF
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+    
+    // הוספת עמודים נוספים אם צריך
+    if (imgHeight > pageHeight) {
+        let heightLeft = imgHeight;
+        let position = 0;
+        while (heightLeft >= 0) {
+            position = heightLeft - pageHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+    }
+    
+    // הוספת החתימה
+    const signatureWidth = 60;
+    const signatureHeight = 30;
+    const signatureX = 20;
+    const signatureY = pageHeight - 50;
+    pdf.addImage(signatureDataURL, 'PNG', signatureX, signatureY, signatureWidth, signatureHeight);
+    
+    // הוספת תאריך ושעה
     const now = new Date();
     const timestamp = `חתימה בתאריך: ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} בשעה: ${now.getHours()}:${now.getMinutes()}`;
-    pdf.text(timestamp, 10, pdfHeight - 30);
+    pdf.setFontSize(10);
+    pdf.text(timestamp, 20, pageHeight - 15, { align: 'right' });
 
     return pdf;
 }
@@ -110,7 +155,7 @@ function previewPDF(pdfData) {
         console.error('PDF preview element not found');
         return;
     }
-    pdfPreviewElement.innerHTML = ''; // ניקוי תצוגה קודמת
+    pdfPreviewElement.innerHTML = '';
 
     pdfjsLib.getDocument({data: pdfData}).promise.then(function(pdf) {
         pdf.getPage(1).then(function(page) {
