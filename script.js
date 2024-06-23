@@ -41,24 +41,47 @@ function draw(event) {
     ctx.moveTo(x, y);
 }
 
-// שליחה של ההצעה החתומה במייל לאחר החתימה
-document.getElementById('submitSignature').addEventListener('click', async function() {
-    // שמירת החתימה כתמונה ב-Base64
-    const dataURL = canvas.toDataURL('image/png');
+// פונקציה ליצירת PDF מההצעה עם החתימה
+async function createPDF(proposalElement, signatureDataURL) {
+    // טעינת jsPDF מ-umd
+    const { jsPDF } = window.jspdf;
 
-    // המרת ה-DOM של ההצעה ל-PDF באמצעות html2canvas ו-jsPDF
-    const proposalElement = document.getElementById('proposalContainer');
-    const pdf = new jsPDF('p', 'mm', 'a4'); // יצירת PDF בפורמט A4
+    // יצירת PDF בפורמט A4
+    const pdf = new jsPDF('p', 'mm', 'a4');
 
     // צילום המסך של ההצעה והחתימה
     const canvasElement = await html2canvas(proposalElement);
+    
+    // המרת הקנבס לנתוני תמונה
     const imgData = canvasElement.toDataURL('image/png');
 
     // הוספת התמונה ל-PDF
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // התאמת גודל התמונה ל-PDF
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvasElement.width;
+    const imgHeight = canvasElement.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+    const imgY = 30;
+    pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
 
     // הוספת החתימה ל-PDF
-    pdf.addImage(dataURL, 'PNG', 10, canvasElement.height * 0.2 + 20, 80, 20); // הוספת החתימה למקום מסוים ב-PDF
+    pdf.addImage(signatureDataURL, 'PNG', 10, pdfHeight - 60, 80, 20);
+
+    // הוספת תאריך ושעה
+    const now = new Date();
+    const timestamp = `חתימה בתאריך: ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} בשעה: ${now.getHours()}:${now.getMinutes()}`;
+    pdf.text(timestamp, 10, pdfHeight - 30);
+
+    return pdf;
+}
+
+// שליחה של ההצעה החתומה במייל לאחר החתימה
+document.getElementById('submitSignature').addEventListener('click', async function() {
+    const dataURL = canvas.toDataURL('image/png');
+
+    const proposalElement = document.getElementById('proposalContainer');
+    const pdf = await createPDF(proposalElement, dataURL);
 
     // יצירת Blob מה-PDF
     const pdfBlob = pdf.output('blob');
@@ -67,7 +90,7 @@ document.getElementById('submitSignature').addEventListener('click', async funct
     const reader = new FileReader();
     reader.readAsDataURL(pdfBlob);
     reader.onloadend = async function() {
-        const pdfBase64 = reader.result.split(',')[1]; // קבלת הנתונים ב-Base64
+        const pdfBase64 = reader.result.split(',')[1];
 
         // הגדרת פרטי המייל
         const emailSubject = 'אישור הצעת מחיר';
@@ -141,3 +164,13 @@ async function sendEmail(from, to, subject, body, pdfBase64) {
         console.error('Error sending email:', error);
     }
 }
+
+// מעבר חלק לעוגנים בדף
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});

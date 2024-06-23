@@ -27,12 +27,12 @@ header {
 }
 
 header .logo {
-    max-width: 200px; /* הגדלת הלוגו */
+    max-width: 150px; /* התאמת גודל הלוגו */
     margin-bottom: 10px;
 }
 
 header h1 {
-    font-size: 2.2em;
+    font-size: 2em;
     color: #4A3F68; /* סגול עמוק ועדין */
     margin: 10px 0;
 }
@@ -42,18 +42,20 @@ header h2 {
     color: #8E7CC3; /* סגול בהיר יותר */
 }
 
+nav a {
+    margin: 0 10px;
+    color: #4A3F68;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
 main {
     padding: 20px;
-}
-
-.intro {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.intro p {
-    font-size: 1.2em;
-    color: #333333; /* צבע טקסט כהה ועדין */
 }
 
 .card {
@@ -65,7 +67,7 @@ main {
 }
 
 .card h2 {
-    font-size: 1.8em;
+    font-size: 1.6em;
     color: #4A3F68; /* סגול עמוק ועדין */
     margin-bottom: 15px;
     border-bottom: 2px solid #B8A9C9; /* הדגשת כותרות */
@@ -88,15 +90,16 @@ main {
     background-color: #4A3F68; /* סגול עמוק ועדין */
     color: #FFFFFF;
     border: none;
-    padding: 10px 20px;
+    padding: 15px 30px; /* הגדלת הכפתור */
     font-size: 1.2em;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* אפקט מעבר */
 }
 
 .button:hover {
     background-color: #8E7CC3; /* סגול בהיר יותר */
+    transform: scale(1.05); /* אפקט הגדלה */
 }
 
 /* סגנון לכפתור וואטסאפ */
@@ -138,6 +141,7 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     z-index: 1000;
     display: none; /* הפופאפ מוסתר עד לפתיחתו */
+    border-radius: 10px;
 }
 
 #signaturePopup canvas {
@@ -154,10 +158,16 @@ main {
     border-radius: 5px;
     cursor: pointer;
     margin: 5px;
+    transition: background-color 0.3s ease;
 }
 
 #submitSignature:hover, #closePopup:hover {
     background-color: #8E7CC3; /* סגול בהיר יותר */
+}
+
+/* סגנון לעוגנים ומעבר חלק */
+html {
+    scroll-behavior: smooth;
 }
 
 /* עיצוב כללי לריספונסיביות */
@@ -167,26 +177,27 @@ main {
     }
 
     header .logo {
-        max-width: 150px; /* התאמת גודל הלוגו למסכים קטנים יותר */
+        max-width: 120px; /* התאמת גודל הלוגו למסכים קטנים יותר */
     }
 
     header h1 {
-        font-size: 1.8em;
+        font-size: 1.6em;
     }
 
     header h2 {
         font-size: 1.2em;
     }
 
+    nav a {
+        font-size: 0.9em;
+        margin: 0 5px;
+    }
+
     main {
         padding: 15px 0;
     }
 
-    .intro p, .card ul li {
-        font-size: 1em;
-    }
-
     .card h2 {
-        font-size: 1.6em;
+        font-size: 1.4em;
     }
 }
