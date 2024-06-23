@@ -1,7 +1,7 @@
 // אתחול Google API Client
 function initClient() {
     gapi.client.init({
-        apiKey: 'YOUR_API_KEY',
+        apiKey: 'YOUR_API_KEY', // החלף עם מפתח ה-API שלך
         clientId: '773526387599-e7plamuuek9uobg1m4grf5ij30t7sfhg.apps.googleusercontent.com',
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
         scope: 'https://www.googleapis.com/auth/gmail.send'
@@ -15,32 +15,52 @@ function initClient() {
 // טעינת Google API Client
 gapi.load('client:auth2', initClient);
 
-// הצגת פופאפ החתימה כאשר לוחצים על כפתור החתימה
-document.getElementById('signButton').addEventListener('click', function() {
-    document.getElementById('signaturePopup').style.display = 'block';
-});
+// פונקציה להוספת מאזיני אירועים
+function addEventListeners() {
+    document.getElementById('signButton')?.addEventListener('click', showSignaturePopup);
+    document.getElementById('closePopup')?.addEventListener('click', hideSignaturePopup);
+    document.getElementById('submitSignature')?.addEventListener('click', handleSignatureSubmit);
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', smoothScroll);
+    });
+}
 
-// סגירת פופאפ החתימה כאשר לוחצים על כפתור הסגירה
-document.getElementById('closePopup').addEventListener('click', function() {
+// פונקציות לטיפול באירועים
+function showSignaturePopup() {
+    document.getElementById('signaturePopup').style.display = 'block';
+}
+
+function hideSignaturePopup() {
     document.getElementById('signaturePopup').style.display = 'none';
-});
+}
+
+function smoothScroll(e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+        behavior: 'smooth'
+    });
+}
 
 // הגדרות ליצירת חתימה באמצעות העכבר
 const canvas = document.getElementById('signatureCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas?.getContext('2d');
 let drawing = false;
 
-canvas.addEventListener('mousedown', () => {
+if (canvas) {
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+}
+
+function startDrawing() {
     drawing = true;
     ctx.beginPath();
-});
+}
 
-canvas.addEventListener('mouseup', () => {
+function stopDrawing() {
     drawing = false;
     ctx.beginPath();
-});
-
-canvas.addEventListener('mousemove', draw);
+}
 
 function draw(event) {
     if (!drawing) return;
@@ -86,6 +106,10 @@ async function createPDF(proposalElement, signatureDataURL) {
 // פונקציה להצגת ה-PDF
 function previewPDF(pdfData) {
     const pdfPreviewElement = document.getElementById('pdfPreview');
+    if (!pdfPreviewElement) {
+        console.error('PDF preview element not found');
+        return;
+    }
     pdfPreviewElement.innerHTML = ''; // ניקוי תצוגה קודמת
 
     pdfjsLib.getDocument({data: pdfData}).promise.then(function(pdf) {
@@ -156,8 +180,8 @@ async function sendEmail(from, to, subject, body, pdfBase64) {
     }
 }
 
-// שליחה של ההצעה החתומה במייל לאחר החתימה
-document.getElementById('submitSignature').addEventListener('click', async function() {
+// טיפול בשליחת החתימה
+async function handleSignatureSubmit() {
     const dataURL = canvas.toDataURL('image/png');
     const proposalElement = document.getElementById('proposalContainer');
     const pdf = await createPDF(proposalElement, dataURL);
@@ -187,14 +211,7 @@ document.getElementById('submitSignature').addEventListener('click', async funct
         document.getElementById('pdfPreviewPopup').style.display = 'none';
         document.getElementById('signaturePopup').style.display = 'none';
     };
-});
+}
 
-// מעבר חלק לעוגנים בדף
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
-});
+// הוספת מאזיני אירועים כשהדף נטען
+document.addEventListener('DOMContentLoaded', addEventListeners);
