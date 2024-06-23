@@ -1,3 +1,20 @@
+// אתחול Google API Client
+function initClient() {
+    gapi.client.init({
+        apiKey: 'YOUR_API_KEY',
+        clientId: '773526387599-e7plamuuek9uobg1m4grf5ij30t7sfhg.apps.googleusercontent.com',
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
+        scope: 'https://www.googleapis.com/auth/gmail.send'
+    }).then(() => {
+        console.log('Google API Client initialized');
+    }).catch(error => {
+        console.error('Error initializing Google API Client:', error);
+    });
+}
+
+// טעינת Google API Client
+gapi.load('client:auth2', initClient);
+
 // הצגת פופאפ החתימה כאשר לוחצים על כפתור החתימה
 document.getElementById('signButton').addEventListener('click', function() {
     document.getElementById('signaturePopup').style.display = 'block';
@@ -43,19 +60,11 @@ function draw(event) {
 
 // פונקציה ליצירת PDF מההצעה עם החתימה
 async function createPDF(proposalElement, signatureDataURL) {
-    // טעינת jsPDF מ-umd
     const { jsPDF } = window.jspdf;
-
-    // יצירת PDF בפורמט A4
     const pdf = new jsPDF('p', 'mm', 'a4');
-
-    // צילום המסך של ההצעה והחתימה
     const canvasElement = await html2canvas(proposalElement);
-    
-    // המרת הקנבס לנתוני תמונה
     const imgData = canvasElement.toDataURL('image/png');
 
-    // הוספת התמונה ל-PDF
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgWidth = canvasElement.width;
@@ -65,10 +74,8 @@ async function createPDF(proposalElement, signatureDataURL) {
     const imgY = 30;
     pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
 
-    // הוספת החתימה ל-PDF
     pdf.addImage(signatureDataURL, 'PNG', 10, pdfHeight - 60, 80, 20);
 
-    // הוספת תאריך ושעה
     const now = new Date();
     const timestamp = `חתימה בתאריך: ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} בשעה: ${now.getHours()}:${now.getMinutes()}`;
     pdf.text(timestamp, 10, pdfHeight - 30);
@@ -76,94 +83,111 @@ async function createPDF(proposalElement, signatureDataURL) {
     return pdf;
 }
 
-// שליחה של ההצעה החתומה במייל לאחר החתימה
-document.getElementById('submitSignature').addEventListener('click', async function() {
-    const dataURL = canvas.toDataURL('image/png');
+// פונקציה להצגת ה-PDF
+function previewPDF(pdfData) {
+    const pdfPreviewElement = document.getElementById('pdfPreview');
+    pdfPreviewElement.innerHTML = ''; // ניקוי תצוגה קודמת
 
-    const proposalElement = document.getElementById('proposalContainer');
-    const pdf = await createPDF(proposalElement, dataURL);
+    pdfjsLib.getDocument({data: pdfData}).promise.then(function(pdf) {
+        pdf.getPage(1).then(function(page) {
+            const scale = 1.5;
+            const viewport = page.getViewport({scale: scale});
 
-    // יצירת Blob מה-PDF
-    const pdfBlob = pdf.output('blob');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
 
-    // המרת Blob ל-Base64 עבור המייל
-    const reader = new FileReader();
-    reader.readAsDataURL(pdfBlob);
-    reader.onloadend = async function() {
-        const pdfBase64 = reader.result.split(',')[1];
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            page.render(renderContext);
 
-        // הגדרת פרטי המייל
-        const emailSubject = 'אישור הצעת מחיר';
-        const emailBody = `
-            <h1>הצעת מחיר לריטיינר חודשי</h1>
-            <h2>עבור חברת Homerun</h2>
-            <p>ריטיינר חודשי: 5,000 ש"ח</p>
-            <p>כל השינויים וההתאמות במסגרת השירותים הכלולים בריטיינר כלולים במחיר החודשי.</p>
-            <p>פרויקטים נוספים או התאמות שאינם כלולים בשירותים המוצעים יהיו כרוכים בעלות נוספת.</p>
-            <p>אנו מחויבים לשמירה על סודיות מלאה של המידע העסקי שלכם. כל החומרים שנוצרים במהלך העבודה יהיו בבעלותכם המלאה ולא ייעשה בהם שימוש אחר ללא אישורכם.</p>
-            <p>חתימה דיגיטלית:</p>
-            <img src="${dataURL}" alt="חתימה דיגיטלית" />
-        `;
+            pdfPreviewElement.appendChild(canvas);
+        });
+    });
 
-        // שליחת המייל עם הקובץ המצורף
-        await sendEmail('Triroars@gmail.com', 'shimi.homerun@gmail.com', emailSubject, emailBody, pdfBase64);
-
-        // הסתרת פופאפ החתימה לאחר השליחה
-        document.getElementById('signaturePopup').style.display = 'none';
-    };
-});
+    document.getElementById('pdfPreviewPopup').style.display = 'block';
+}
 
 // פונקציה לשליחת המייל באמצעות Gmail API
 async function sendEmail(from, to, subject, body, pdfBase64) {
-    // פרטי OAuth2 שלך
-    const clientId = '773526387599-e7plamuuek9uobg1m4grf5ij30t7sfhg.apps.googleusercontent.com';
-    const clientSecret = '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';
-    const refreshToken = '1//03UCWOVTdiT2JCgYIARAAGAMSNwF-L9IrgSTrMW6iKB_kUgAzhtxBgD-I7kB78_wbAMm73OHj2BgmO4rjrWV_wSrvLEeOmIjpTw0';
+    const accessToken = gapi.auth.getToken().access_token;
+    const message = [
+        'Content-Type: multipart/mixed; boundary="foo_bar_baz"\n',
+        'MIME-Version: 1.0\n',
+        `To: ${to}\n`,
+        `From: ${from}\n`,
+        `Subject: ${subject}\n\n`,
 
-    // הגדרת ה-client OAuth2
-    const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
+        '--foo_bar_baz\n',
+        'Content-Type: text/plain; charset="UTF-8"\n',
+        'MIME-Version: 1.0\n',
+        'Content-Transfer-Encoding: 7bit\n\n',
 
-    oAuth2Client.setCredentials({ refresh_token: refreshToken });
+        body,
+        '\n\n',
+
+        '--foo_bar_baz\n',
+        'Content-Type: application/pdf\n',
+        'MIME-Version: 1.0\n',
+        'Content-Transfer-Encoding: base64\n',
+        'Content-Disposition: attachment; filename="proposal_signed.pdf"\n\n',
+
+        pdfBase64,
+        '\n\n',
+
+        '--foo_bar_baz--'
+    ].join('');
 
     try {
-        // קבלת access token
-        const accessToken = await oAuth2Client.getAccessToken();
-
-        // קביעת הטרנספורטר של Nodemailer
-        const transport = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: from,
-                clientId,
-                clientSecret,
-                refreshToken,
-                accessToken: accessToken.token,
-            },
+        const result = await gapi.client.gmail.users.messages.send({
+            'userId': 'me',
+            'resource': {
+                'raw': btoa(unescape(encodeURIComponent(message))).replace(/\+/g, '-').replace(/\//g, '_')
+            }
         });
-
-        // קביעת אפשרויות המייל
-        const mailOptions = {
-            from,
-            to,
-            subject,
-            html: body,
-            attachments: [
-                {
-                    filename: 'proposal_signed.pdf',
-                    content: pdfBase64,
-                    encoding: 'base64'
-                }
-            ]
-        };
-
-        // שליחת המייל
-        const result = await transport.sendMail(mailOptions);
         console.log('Email sent:', result);
+        alert('המייל נשלח בהצלחה!');
     } catch (error) {
         console.error('Error sending email:', error);
+        alert('שגיאה בשליחת המייל. אנא נסה שוב.');
     }
 }
+
+// שליחה של ההצעה החתומה במייל לאחר החתימה
+document.getElementById('submitSignature').addEventListener('click', async function() {
+    const dataURL = canvas.toDataURL('image/png');
+    const proposalElement = document.getElementById('proposalContainer');
+    const pdf = await createPDF(proposalElement, dataURL);
+    const pdfData = pdf.output('arraybuffer');
+
+    previewPDF(pdfData);
+
+    document.getElementById('sendEmailBtn').onclick = async function() {
+        const pdfBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(pdfData)));
+        const emailSubject = 'אישור הצעת מחיר';
+        const emailBody = `
+            הצעת מחיר לריטיינר חודשי
+            עבור חברת Homerun
+            
+            ריטיינר חודשי: 5,000 ש"ח
+            
+            כל השינויים וההתאמות במסגרת השירותים הכלולים בריטיינר כלולים במחיר החודשי.
+            
+            פרויקטים נוספים או התאמות שאינם כלולים בשירותים המוצעים יהיו כרוכים בעלות נוספת.
+            
+            אנו מחויבים לשמירה על סודיות מלאה של המידע העסקי שלכם. כל החומרים שנוצרים במהלך העבודה יהיו בבעלותכם המלאה ולא ייעשה בהם שימוש אחר ללא אישורכם.
+            
+            חתימה דיגיטלית מצורפת בקובץ ה-PDF.
+        `;
+
+        await sendEmail('Triroars@gmail.com', 'shimi.homerun@gmail.com', emailSubject, emailBody, pdfBase64);
+        document.getElementById('pdfPreviewPopup').style.display = 'none';
+        document.getElementById('signaturePopup').style.display = 'none';
+    };
+});
 
 // מעבר חלק לעוגנים בדף
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
