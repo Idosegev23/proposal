@@ -3,17 +3,18 @@ body {
     font-family: 'Heebo', sans-serif;
     margin: 0;
     padding: 0;
-    direction: rtl; /* הגדרה של כיוון הטקסט מימין לשמאל */
-    background: #F9FAFC; /* רקע אפור בהיר ונעים */
-    color: #333333; /* צבע טקסט כהה ועדין */
+    direction: rtl;
+    background: #FFFFFF;
+    color: #0D0D0D;
     line-height: 1.6;
+    overflow-x: hidden; /* למנוע גלילה אופקית */
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #FFFFFF;
+    background: #F9F9F9;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -21,7 +22,7 @@ body {
 header {
     text-align: center;
     padding: 20px 0;
-    border-bottom: 2px solid #B8A9C9; /* צבע סגול עדין */
+    border-bottom: 2px solid #62238C;
     background: #FFFFFF;
     border-radius: 10px 10px 0 0;
 }
@@ -33,13 +34,19 @@ header .logo {
 
 header h1 {
     font-size: 2.2em;
-    color: #4A3F68; /* סגול עמוק ועדין */
+    color: #62238C;
     margin: 10px 0;
 }
 
 header h2 {
     font-size: 1.4em;
-    color: #8E7CC3; /* סגול בהיר יותר */
+    color: #BF4B81;
+}
+
+header p {
+    font-size: 1.2em;
+    color: #0D0D0D;
+    margin: 0;
 }
 
 main {
@@ -53,7 +60,7 @@ main {
 
 .intro p {
     font-size: 1.2em;
-    color: #333333; /* צבע טקסט כהה ועדין */
+    color: #0D0D0D;
 }
 
 .card {
@@ -66,9 +73,9 @@ main {
 
 .card h2 {
     font-size: 1.8em;
-    color: #4A3F68; /* סגול עמוק ועדין */
+    color: #62238C;
     margin-bottom: 15px;
-    border-bottom: 2px solid #B8A9C9; /* הדגשת כותרות */
+    border-bottom: 2px solid #BF4B81; /* הדגשת כותרות */
     padding-bottom: 10px;
 }
 
@@ -80,46 +87,53 @@ main {
 .card ul li {
     font-size: 1.1em;
     margin-bottom: 10px;
-    color: #333333; /* צבע טקסט כהה ועדין */
+    color: #0D0D0D;
 }
 
-/* סגנון לכפתור החתימה */
 .button {
-    background-color: #4A3F68; /* סגול עמוק ועדין */
+    background-color: #62238C;
     color: #FFFFFF;
     border: none;
     padding: 10px 20px;
     font-size: 1.2em;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease; /* הוספת אפקט מעבר */
 }
 
 .button:hover {
-    background-color: #8E7CC3; /* סגול בהיר יותר */
+    background-color: #BF4B81;
 }
 
-/* סגנון לכפתור וואטסאפ */
+footer {
+    text-align: center;
+    padding: 15px 0;
+    border-top: 2px solid #62238C;
+    background: #FFFFFF;
+    border-radius: 0 0 10px 10px;
+    margin-top: 20px;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer a {
+    color: #BF4B81;
+    text-decoration: none;
+    font-weight: 600;
+}
+
 .whatsapp-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
     background-color: #25D366;
-    color: #FFFFFF;
-    border: none;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.whatsapp-button:hover {
-    background-color: #1EBE5E;
+    transition: background-color 0.3s ease; /* הוספת אפקט מעבר */
 }
 
 .whatsapp-button img {
@@ -127,40 +141,46 @@ main {
     height: 30px;
 }
 
-/* סגנון לפופאפ של החתימה */
+.whatsapp-button:hover {
+    background-color: #1EBE5D;
+}
+
+/* פופאפ לחתימה דיגיטלית */
 #signaturePopup {
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 20px;
     background-color: #FFFFFF;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    display: none; /* הפופאפ מוסתר עד לפתיחתו */
 }
 
 #signaturePopup canvas {
-    border: 1px solid #333333; /* צבע טקסט כהה ועדין */
-    margin-bottom: 20px;
-}
-
-#submitSignature, #closePopup {
-    background-color: #4A3F68; /* סגול עמוק ועדין */
-    color: #FFFFFF;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1em;
+    display: block;
+    margin: 0 auto 20px;
+    border: 1px solid #62238C;
     border-radius: 5px;
-    cursor: pointer;
-    margin: 5px;
 }
 
-#submitSignature:hover, #closePopup:hover {
-    background-color: #8E7CC3; /* סגול בהיר יותר */
+#signaturePopup .button {
+    display: block;
+    width: 100px;
+    margin: 0 auto 10px;
 }
 
-/* עיצוב כללי לריספונסיביות */
+#closePopup {
+    background-color: #D9534F;
+}
+
+#closePopup:hover {
+    background-color: #C9302C;
+}
+
+/* התאמות לתצוגות ניידות */
 @media screen and (max-width: 768px) {
     .container {
         padding: 15px;
@@ -183,19 +203,10 @@ main {
     }
 
     .intro p, .card ul li {
-        font-size: 1em;
+        font-size: 1.1em;
     }
 
     .card h2 {
         font-size: 1.6em;
     }
-}
-
-/* סגנון לאזור של Three.js */
-#threejs-container {
-    width: 100%;
-    height: 400px; /* גובה ה-Three.js container */
-    background-color: #F9FAFC; /* צבע רקע תואם */
-    margin-top: 20px;
-    border-radius: 10px;
 }
