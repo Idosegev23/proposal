@@ -6,8 +6,6 @@
     <title>הצעת מחיר - TriRoars לחברת Homerun</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/scrollreveal"></script>
 </head>
 <body>
     <div class="container">
@@ -16,8 +14,6 @@
             <h1>הצעת מחיר לריטיינר חודשי</h1>
             <h2>עבור חברת Homerun</h2>
             <p>בינה לעסקים מתקדמים</p>
-            <!-- קנבס ל-Three.js -->
-            <canvas id="three-canvas" class="three-canvas"></canvas>
         </header>
 
         <main>
@@ -79,40 +75,5 @@
         </div>
     </div>
     <script src="script.js"></script>
-    <script>
-        // ScrollReveal Animation
-        ScrollReveal().reveal('.card', {
-            delay: 200,
-            distance: '50px',
-            easing: 'ease-in-out',
-            origin: 'bottom'
-        });
-
-        // Three.js Example for header background
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas') });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Adding a simple cube
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-
-        camera.position.z = 5;
-
-        const animate = function () {
-            requestAnimationFrame(animate);
-
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-
-            renderer.render(scene, camera);
-        };
-
-        animate();
-    </script>
 </body>
 </html>
