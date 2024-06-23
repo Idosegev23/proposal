@@ -1,4 +1,4 @@
-/* Global Styles */
+/* סגנון כללי */
 body {
     font-family: 'Heebo', sans-serif;
     margin: 0;
@@ -7,7 +7,6 @@ body {
     background: #FFFFFF;
     color: #0D0D0D;
     line-height: 1.6;
-    overflow-x: hidden; /* למנוע גלילה אופקית */
 }
 
 .container {
@@ -28,7 +27,7 @@ header {
 }
 
 header .logo {
-    max-width: 250px; /* הגדלת הלוגו */
+    max-width: 200px; /* הגדלת הלוגו */
     margin-bottom: 10px;
 }
 
@@ -41,12 +40,6 @@ header h1 {
 header h2 {
     font-size: 1.4em;
     color: #BF4B81;
-}
-
-header p {
-    font-size: 1.2em;
-    color: #0D0D0D;
-    margin: 0;
 }
 
 main {
@@ -69,12 +62,6 @@ main {
     background: #FFFFFF;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* אפקט מעבר */
-}
-
-.card:hover {
-    transform: translateY(-10px); /* הרמת הכרטיס */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* צל עמוק יותר */
 }
 
 .card h2 {
@@ -104,12 +91,10 @@ main {
     font-size: 1.2em;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease; /* הוספת אפקט מעבר */
 }
 
 .button:hover {
     background-color: #BF4B81;
-    transform: scale(1.05); /* הגדלה קלה של הכפתור */
 }
 
 footer {
@@ -135,60 +120,39 @@ footer a {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #25D366;
+    background: #25D366;
+    border: none;
+    padding: 10px;
     border-radius: 50%;
-    padding: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease; /* הוספת אפקט מעבר */
 }
 
 .whatsapp-button img {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
 }
 
-.whatsapp-button:hover {
-    background-color: #1EBE5D;
-    transform: scale(1.1); /* הגדלה קלה של הכפתור */
-}
-
-/* פופאפ לחתימה דיגיטלית */
+/* סגנון לפופאפ החתימה */
 #signaturePopup {
     display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #FFFFFF;
     padding: 20px;
+    background: #FFFFFF;
+    border: 2px solid #62238C;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
 }
 
-#signaturePopup canvas {
-    display: block;
-    margin: 0 auto 20px;
-    border: 1px solid #62238C;
+#signatureCanvas {
+    border: 2px solid #BF4B81;
     border-radius: 5px;
+    margin-bottom: 10px;
 }
 
-#signaturePopup .button {
-    display: block;
-    width: 100px;
-    margin: 0 auto 10px;
-}
-
-#closePopup {
-    background-color: #D9534F;
-}
-
-#closePopup:hover {
-    background-color: #C9302C;
-}
-
-/* התאמות לתצוגות ניידות */
+/* סגנון למסכים קטנים */
 @media screen and (max-width: 768px) {
     .container {
         padding: 15px;
