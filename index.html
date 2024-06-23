@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 </head>
@@ -74,7 +74,7 @@
         </footer>
 
         <!-- כפתור וואטסאפ -->
-        <button class="whatsapp-button" onclick="window.open('https://wa.me/972547667775?text=היי%20עידו%20אנחנו%20נשמח%20לעוד%20פרטים', '_blank')">
+        <button class="whatsapp-button" id="whatsappButton">
             <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         </button>
 
@@ -91,7 +91,7 @@
                 <h2>תצוגה מקדימה של ה-PDF</h2>
                 <div id="pdfPreview"></div>
                 <button id="sendEmailBtn" class="button">שלח מייל</button>
-                <button onclick="document.getElementById('pdfPreviewPopup').style.display='none';" class="button">סגור</button>
+                <button id="closePdfPreview" class="button">סגור</button>
             </div>
         </div>
     </div>
