@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 </head>
@@ -82,6 +83,16 @@
             <canvas id="signatureCanvas" width="500" height="200"></canvas>
             <button id="submitSignature" class="button">אשר ושלח</button>
             <button id="closePopup" class="button">סגור</button>
+        </div>
+
+        <!-- פופאפ לתצוגה מקדימה של ה-PDF -->
+        <div id="pdfPreviewPopup" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000;">
+            <div style="background:white; margin:50px auto; padding:20px; width:80%; max-width:800px; max-height:80%; overflow:auto;">
+                <h2>תצוגה מקדימה של ה-PDF</h2>
+                <div id="pdfPreview"></div>
+                <button id="sendEmailBtn" class="button">שלח מייל</button>
+                <button onclick="document.getElementById('pdfPreviewPopup').style.display='none';" class="button">סגור</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
