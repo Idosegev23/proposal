@@ -1,0 +1,14 @@
+{
+  "name": "proposal",
+  "version": "1.0.0",
+  "description": "דף נחיתה להצעת מחיר של TriRoars לחברת Homerun",
+  "main": "index.js",
+  "scripts": {
+    "start": "live-server --port=8080"
+  },
+  "author": "עידו שגב",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
