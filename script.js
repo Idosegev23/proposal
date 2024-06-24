@@ -7,7 +7,6 @@ function initClient() {
         console.log('OAuth 2.0 Client initialized');
     }).catch(error => {
         console.error('Error initializing OAuth 2.0 Client:', error);
-        // נסה להתחבר באופן ידני
         gapi.auth2.getAuthInstance().signIn().then(() => {
             console.log('Manual sign-in successful');
         }).catch(signInError => {
@@ -25,7 +24,6 @@ function addEventListeners() {
     document.getElementById('closePopup')?.addEventListener('click', hideSignaturePopup);
     document.getElementById('submitSignature')?.addEventListener('click', handleSignatureSubmit);
     document.getElementById('whatsappButton')?.addEventListener('click', openWhatsApp);
-    document.getElementById('closePdfPreview')?.addEventListener('click', hidePdfPreview);
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', smoothScroll);
     });
@@ -38,10 +36,6 @@ function showSignaturePopup() {
 
 function hideSignaturePopup() {
     document.getElementById('signaturePopup').style.display = 'none';
-}
-
-function hidePdfPreview() {
-    document.getElementById('pdfPreviewPopup').style.display = 'none';
 }
 
 function openWhatsApp() {
@@ -92,122 +86,17 @@ function draw(event) {
     ctx.moveTo(x, y);
 }
 
-// פונקציה ליצירת PDF מההצעה עם החתימה
-async function createPDF(proposalElement, signatureDataURL) {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    
-    // קביעת גודל הדף
-    const pageWidth = pdf.internal.pageSize.width;
-    const pageHeight = pdf.internal.pageSize.height;
-    
-    // יצירת צילום מסך של ההצעה
-    const canvas = await html2canvas(proposalElement, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
-        taintTest: false
-    });
-    
-    // המרת הקנבס לתמונה
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    
-    // חישוב יחס הגודל
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    // הוספת התמונה לPDF
-    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-    
-    // הוספת עמודים נוספים אם צריך
-    if (imgHeight > pageHeight) {
-        let heightLeft = imgHeight;
-        let position = 0;
-        while (heightLeft >= 0) {
-            position = heightLeft - pageHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-    }
-    
-    // הוספת החתימה
-    const signatureWidth = 60;
-    const signatureHeight = 30;
-    const signatureX = 20;
-    const signatureY = pageHeight - 50;
-    pdf.addImage(signatureDataURL, 'PNG', signatureX, signatureY, signatureWidth, signatureHeight);
-    
-    // הוספת תאריך ושעה
-    const now = new Date();
-    const timestamp = `חתימה בתאריך: ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} בשעה: ${now.getHours()}:${now.getMinutes()}`;
-    pdf.setFontSize(10);
-    pdf.text(timestamp, 20, pageHeight - 15, { align: 'right' });
-
-    return pdf;
-}
-
-// פונקציה להצגת ה-PDF
-function previewPDF(pdfData) {
-    const pdfPreviewElement = document.getElementById('pdfPreview');
-    if (!pdfPreviewElement) {
-        console.error('PDF preview element not found');
-        return;
-    }
-    pdfPreviewElement.innerHTML = '';
-
-    pdfjsLib.getDocument({data: pdfData}).promise.then(function(pdf) {
-        pdf.getPage(1).then(function(page) {
-            const scale = 1.5;
-            const viewport = page.getViewport({scale: scale});
-
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            const renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-            page.render(renderContext);
-
-            pdfPreviewElement.appendChild(canvas);
-        });
-    });
-
-    document.getElementById('pdfPreviewPopup').style.display = 'block';
-}
-
 // פונקציה לשליחת המייל באמצעות Gmail API
-async function sendEmail(from, to, subject, body, pdfBase64) {
+async function sendEmail(to, subject, body) {
     const accessToken = gapi.auth.getToken().access_token;
     const message = [
-        'Content-Type: multipart/mixed; boundary="foo_bar_baz"\n',
-        'MIME-Version: 1.0\n',
-        `To: ${to}\n`,
-        `From: ${from}\n`,
-        `Subject: ${subject}\n\n`,
-
-        '--foo_bar_baz\n',
         'Content-Type: text/plain; charset="UTF-8"\n',
         'MIME-Version: 1.0\n',
-        'Content-Transfer-Encoding: 7bit\n\n',
-
-        body,
-        '\n\n',
-
-        '--foo_bar_baz\n',
-        'Content-Type: application/pdf\n',
-        'MIME-Version: 1.0\n',
-        'Content-Transfer-Encoding: base64\n',
-        'Content-Disposition: attachment; filename="proposal_signed.pdf"\n\n',
-
-        pdfBase64,
-        '\n\n',
-
-        '--foo_bar_baz--'
+        `To: ${to}\n`,
+        'From: Triroars@gmail.com\n',
+        'Cc: Triroars@gmail.com\n',
+        `Subject: ${subject}\n\n`,
+        body
     ].join('');
 
     try {
@@ -226,36 +115,56 @@ async function sendEmail(from, to, subject, body, pdfBase64) {
 }
 
 // טיפול בשליחת החתימה
-async function handleSignatureSubmit() {
-    const dataURL = canvas.toDataURL('image/png');
-    const proposalElement = document.getElementById('proposalContainer');
-    const pdf = await createPDF(proposalElement, dataURL);
-    const pdfData = pdf.output('arraybuffer');
+function handleSignatureSubmit() {
+    const signatureDataURL = canvas.toDataURL('image/png');
+    
+    const emailSubject = 'אישור הצעת מחיר - TriRoars לחברת Homerun';
+    const emailBody = `
+הצעת מחיר לריטיינר חודשי עבור חברת Homerun
 
-    previewPDF(pdfData);
+שלום,
 
-    document.getElementById('sendEmailBtn').onclick = async function() {
-        const pdfBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(pdfData)));
-        const emailSubject = 'אישור הצעת מחיר';
-        const emailBody = `
-            הצעת מחיר לריטיינר חודשי
-            עבור חברת Homerun
-            
-            ריטיינר חודשי: 5,000 ש"ח
-            
-            כל השינויים וההתאמות במסגרת השירותים הכלולים בריטיינר כלולים במחיר החודשי.
-            
-            פרויקטים נוספים או התאמות שאינם כלולים בשירותים המוצעים יהיו כרוכים בעלות נוספת.
-            
-            אנו מחויבים לשמירה על סודיות מלאה של המידע העסקי שלכם. כל החומרים שנוצרים במהלך העבודה יהיו בבעלותכם המלאה ולא ייעשה בהם שימוש אחר ללא אישורכם.
-            
-            חתימה דיגיטלית מצורפת בקובץ ה-PDF.
-        `;
+שמי עידו שגב, מנכ"ל חברת TriRoars. אנו מתמחים בהדרכה ובהטמעת פתרונות בינה מלאכותית ואוטומציה עסקית המותאמים אישית לצרכי הלקוחות שלנו. אני שמח להציע לכם תוכנית עבודה חודשית בריטיינר הכוללת מגוון רחב של שירותים שיקדמו את ניהול העסק שלכם אל המחר.
 
-        await sendEmail('Triroars@gmail.com', 'shimi.homerun@gmail.com', emailSubject, emailBody, pdfBase64);
-        document.getElementById('pdfPreviewPopup').style.display = 'none';
-        document.getElementById('signaturePopup').style.display = 'none';
-    };
+פרטי השירותים:
+1. יצירת בוט וואטסאפ ואתר מבוסס בינה מלאכותית: פיתוח והטמעת בוט שיטפל בתקשורת עם לקוחות באתר ובוואטסאפ, תוך שימוש בכלי AI מתקדמים.
+2. יצירת אוטומציות מלאות לניהול העסק: אוטומציה של תהליכים קריטיים כמו מעקב לידים, ניהול סוכנים וניהול נכסים.
+3. טיוב הלקוחות לתוך מערכות ה-CRM: הטמעת תהליכים לארגון ושיפור הנתונים של לקוחותיכם בתוך מערכת ה-CRM.
+4. יצירת אוטומציה של פרסום בפלטפורמות הקיימות: אוטומציה של קמפיינים פרסומיים בפלטפורמות שונות כדי להגדיל את היעילות והדיוק של הפרסום.
+5. יצירת בוט פרסום: פיתוח בוטים שמנהלים את תהליכי הפרסום בצורה חכמה ומותאמת אישית.
+6. יצירת פלואו לקוח אומניצ'אנל: מעבר בין פלטפורמות שונות לניהול פרסונאלי של הלקוח, לשיפור חוויית הלקוח וניהול יעיל.
+
+כל השינויים, ההתאמות והעדכונים כלולים במחיר הריטיינר החודשי. עם זאת, פרויקטים נוספים מעבר לשירותים הנ"ל יהיו כרוכים בעלות נוספת.
+
+אנו מחויבים לשמירה על סודיות מלאה של המידע העסקי שלכם. כל החומרים שנוצרים במהלך העבודה יהיו בבעלותכם המלאה ולא ייעשה בהם שימוש אחר ללא אישורכם.
+
+אחריות ושיתוף פעולה:
+אנו, ב-TriRoars, לוקחים אחריות מלאה על כל פרויקט שאנו מבצעים, מהתכנון הראשוני ועד לביצוע בפועל. אנו מתחייבים לספק שירות ברמה הגבוהה ביותר ולהבטיח שכל פרויקט יבוצע בהתאם לתוכניות וללוחות הזמנים שנקבעו.
+
+לצורך מימוש הפרויקטים בהצלחה, אנו מבקשים שהלקוח יקצה צוות עבודה מתאים ויפנה את הזמן הדרוש לפגישות ולהנחיות. אנו ניפגש על בסיס שבועי לעדכון על התקדמות העבודה, בין אם בפגישה פרונטלית או בזום, כדי לוודא שהפרויקט מתקדם בצורה חלקה ושהצרכים שלכם מתמלאים במלואם.
+
+תנאי ההתקשרות:
+ריטיינר חודשי: 5,000 ש"ח
+כל השינויים וההתאמות במסגרת השירותים הכלולים בריטיינר כלולים במחיר החודשי.
+פרויקטים נוספים או התאמות שאינם כלולים בשירותים המוצעים יהיו כרוכים בעלות נוספת.
+
+חתימה דיגיטלית:
+${signatureDataURL}
+
+תאריך: ${new Date().toLocaleDateString()}
+
+ליצירת קשר:
+עידו שגב
+טלפון: 054-7667775
+אימייל: Triroars@gmail.com
+
+בברכה,
+עידו שגב
+מנכ"ל TriRoars
+    `;
+
+    sendEmail('shimi.homerun@gmail.com', emailSubject, emailBody);
+    hideSignaturePopup();
 }
 
 // הוספת מאזיני אירועים כשהדף נטען
